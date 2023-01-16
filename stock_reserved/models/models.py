@@ -48,8 +48,8 @@ class SaleOrder(models.Model):
 
     def action_confirm(self):
         for record in self:
-            if record.order_lines.filtered(lambda c: c.is_available is not):
-                for line in record.order_lines.filtered(lambda c: c.is_available is not):
+            if record.order_lines.filtered(lambda c: c.is_available is False):
+                for line in record.order_lines.filtered(lambda c: c.is_available is False):
                     if line.available_stock < line.product_uom_qty and line.product_id.type not in ('consu', 'service'):
                         msg_body = (
                                 'No se cuenta con stock suficiente para cumplir con la demanda pactada del producto %s' %
