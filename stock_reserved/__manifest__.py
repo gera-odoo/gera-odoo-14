@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "stock_reserved",
+    'name': "Reserved Stock for Sales",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,7 +20,7 @@
     'version': '0.2',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','sale_management','stock'],
+    'depends': ['sale_stock'],
 
     # always loaded
     'data': [

@@ -45,3 +45,5 @@ class stock_reserved(models.Model):
                     record.available_stock = False
             else:
                 record.available_stock = False
+
+
