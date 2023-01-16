@@ -4,9 +4,9 @@ from odoo import models, fields, api
 
 
 class stock_reserved(models.Model):
-    _name = 'sale.order.line'
+    _inherit = 'sale.order.line'
 
-    is_available = fields.Boolean(string="Disponible", compute="count_available", store=True)
+    is_available = fields.Boolean(string="Disponible", compute="get_available", store=True)
     available_stock = fields.Float(compute="get_free_qty", string="Disponible", store=True)
 
     @api.depends("available_stock", "product_uom_qty")
@@ -17,10 +17,6 @@ class stock_reserved(models.Model):
                     record.is_available = True
                 else:
                     if record.id:
-                        msg_body = (
-                            'No se cuenta con stock suficiente para cumplir con la demanda pactada del producto %s' %
-                            record.product_id.name + ' Disponible %s' % record.available_stock)
-                        raise Warning(msg_body)
                         record.is_available = False
                     else:
                         record.is_available = True
@@ -32,7 +28,7 @@ class stock_reserved(models.Model):
         for record in self:
             if record.product_id.type == 'product':
                 wh_location_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
-                    [('id', 'child_of', record.warehouse_id.view_location_id.id)],
+                    [('id', 'child_of', record.order_id.warehouse_id.view_location_id.id)],
                     ['id'],
                 )]
                 stock_quant = self.env['stock.quant'].search(
@@ -47,3 +43,18 @@ class stock_reserved(models.Model):
                 record.available_stock = False
 
 
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    def action_confirm(self):
+        for record in self:
+            if record.order_lines.filtered(lambda c: c.is_available is not):
+                for line in record.order_lines.filtered(lambda c: c.is_available is not):
+                    if line.available_stock < line.product_uom_qty and line.product_id.type not in ('consu', 'service'):
+                        msg_body = (
+                                'No se cuenta con stock suficiente para cumplir con la demanda pactada del producto %s' %
+                                line.product_id.name + ' Disponible %s' % line.available_stock)
+                        raise Warning(msg_body)
+            else:
+                res = super(SaleOrder, self).action_confirm()
+        return res
