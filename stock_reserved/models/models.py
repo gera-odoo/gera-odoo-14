@@ -38,7 +38,7 @@ class stock_reserved(models.Model):
                 stock_quant = self.env['stock.quant'].search(
                     [('company_id', '=', record.order_id.company_id.id),
                      ('product_id', '=', record.product_id.id),
-                     ('location_id', 'in', wh_location_ids])
+                     ('location_id', 'in', wh_location_ids)])
                 if stock_quant:
                     record.available_stock = stock_quant.mapped('available_quantity')
                 else:
